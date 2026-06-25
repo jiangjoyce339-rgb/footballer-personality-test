@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>假如你是个著名球星</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a1410;
+      --bg-card: #121f18;
+      --bg-card-hover: #1a2e22;
+      --green: #2ecc71;
+      --green-dim: #1e8449;
+      --green-glow: rgba(46, 204, 113, 0.25);
+      --text: #eef5f0;
+      --text-muted: #8fa898;
+      --border: rgba(46, 204, 113, 0.15);
+      --radius: 16px;
+      --radius-sm: 12px;
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(46, 204, 113, 0.12) 0%, transparent 60%),
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 39px,
+          rgba(46, 204, 113, 0.03) 39px,
+          rgba(46, 204, 113, 0.03) 40px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 39px,
+          rgba(46, 204, 113, 0.03) 39px,
+          rgba(46, 204, 113, 0.03) 40px
+        );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .screen {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .screen.active { display: flex; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Start */
+    .start-screen {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 32px;
+      padding: 40px 0;
+    }
+
+    .ball-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #fff 0%, #ddd 30%, #333 31%, #333 100%);
+      box-shadow: 0 0 40px var(--green-glow), inset 0 0 20px rgba(0,0,0,0.3);
+      position: relative;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .ball-icon::after {
+      content: "";
+      position: absolute;
+      inset: 15%;
+      border-radius: 50%;
+      border: 2px solid rgba(0,0,0,0.15);
+      background:
+        linear-gradient(135deg, transparent 45%, rgba(0,0,0,0.1) 45%, rgba(0,0,0,0.1) 55%, transparent 55%);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .title {
+      font-size: clamp(1.75rem, 6vw, 2.25rem);
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      background: linear-gradient(135deg, var(--text) 0%, var(--green) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: clamp(1rem, 3.5vw, 1.125rem);
+      color: var(--text-muted);
+      margin-top: -16px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 52px;
+      padding: 14px 36px;
+      font-size: 1.125rem;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green) 0%, var(--green-dim) 100%);
+      color: #0a1410;
+      box-shadow: 0 4px 24px var(--green-glow);
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 32px rgba(46, 204, 113, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      flex: 1;
+      min-width: 0;
+    }
+
+    .btn-secondary:hover { background: var(--bg-card-hover); }
+
+    /* Quiz */
+    .quiz-header {
+      margin-bottom: 28px;
+    }
+
+    .progress-text {
+      font-size: 0.9375rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green-dim), var(--green));
+      border-radius: 3px;
+      transition: width 0.35s ease;
+      width: 0%;
+    }
+
+    .question-text {
+      font-size: clamp(1.375rem, 5vw, 1.625rem);
+      font-weight: 700;
+      line-height: 1.45;
+      margin-bottom: 28px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex: 1;
+    }
+
+    .option {
+      display: block;
+      width: 100%;
+      min-height: 56px;
+      padding: 16px 20px;
+      text-align: left;
+      font-size: 1.0625rem;
+      line-height: 1.4;
+      color: var(--text);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .option:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(46, 204, 113, 0.35);
+    }
+
+    .option:active { transform: scale(0.98); }
+
+    .option.selected {
+      background: rgba(46, 204, 113, 0.15);
+      border-color: var(--green);
+      pointer-events: none;
+    }
+
+    .option-label {
+      display: inline-block;
+      font-weight: 700;
+      color: var(--green);
+      margin-right: 8px;
+      min-width: 1.5em;
+    }
+
+    /* Result */
+    .result-screen {
+      justify-content: center;
+      align-items: center;
+      padding: 16px 0 24px;
+    }
+
+    .result-card {
+      width: 100%;
+      text-align: center;
+      padding: 40px 28px 32px;
+      background: linear-gradient(165deg, #152820 0%, var(--bg-card) 45%, #0e1a14 100%);
+      border: 1px solid rgba(46, 204, 113, 0.22);
+      border-radius: 24px;
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+        0 24px 64px rgba(0, 0, 0, 0.45),
+        0 0 80px var(--green-glow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-card::before {
+      content: "";
+      position: absolute;
+      top: -60%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120%;
+      height: 80%;
+      background: radial-gradient(ellipse, rgba(46, 204, 113, 0.14) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .result-card::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      opacity: 0.6;
+    }
+
+    .result-card > * { position: relative; z-index: 1; }
+
+    .result-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .result-tag {
+      display: block;
+      font-size: clamp(2rem, 8vw, 2.75rem);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      color: var(--green);
+      text-shadow: 0 0 40px rgba(46, 204, 113, 0.5);
+      margin-bottom: 20px;
+      line-height: 1.1;
+    }
+
+    .result-divider {
+      width: 48px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      margin: 0 auto 24px;
+      border-radius: 2px;
+    }
+
+    .result-name {
+      font-size: clamp(3rem, 14vw, 4.25rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      background: linear-gradient(180deg, #ffffff 0%, var(--text) 40%, var(--green) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+
+    .result-type {
+      font-size: clamp(1.125rem, 4.5vw, 1.5rem);
+      font-weight: 700;
+      color: rgba(46, 204, 113, 0.9);
+      margin-bottom: 28px;
+    }
+
+    .result-desc {
+      font-size: clamp(1rem, 3.8vw, 1.125rem);
+      color: var(--text-muted);
+      line-height: 1.75;
+      padding: 20px 16px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-sm);
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      margin-top: 28px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--green);
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+      z-index: 100;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 380px) {
+      .result-actions { flex-direction: column; }
+      .btn-secondary { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- 开始页 -->
+    <section id="start-screen" class="screen start-screen active">
+      <div class="ball-icon" aria-hidden="true"></div>
+      <div>
+        <h1 class="title">假如你是个著名球星</h1>
+        <p class="subtitle">10道题测出你的球场人格</p>
+      </div>
+      <button class="btn btn-primary" id="btn-start">开始测试</button>
+    </section>
+
+    <!-- 答题页 -->
+    <section id="quiz-screen" class="screen">
+      <div class="quiz-header">
+        <div class="progress-text" id="progress-text">第 1 题 / 共 10 题</div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+      <h2 class="question-text" id="question-text"></h2>
+      <div class="options" id="options"></div>
+    </section>
+
+    <!-- 结果页 -->
+    <section id="result-screen" class="screen result-screen">
+      <div class="result-card">
+        <p class="result-label">你的球场人格</p>
+        <p class="result-tag" id="result-tag"></p>
+        <div class="result-divider" aria-hidden="true"></div>
+        <h2 class="result-name" id="result-name"></h2>
+        <p class="result-type" id="result-type"></p>
+        <p class="result-desc" id="result-desc"></p>
+        <div class="result-actions">
+          <button class="btn btn-secondary" id="btn-share">分享结果</button>
+          <button class="btn btn-secondary" id="btn-restart">再测一次</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STARS = [
+      { name: "C罗", tag: "SIU", type: "庆祝型人格", desc: "今朝有酒今朝醉，庆祝一会是一会" },
+      { name: "梅西", tag: "YYDS", type: "GOAT型人格", desc: "你就是足球界永远的神" },
+      { name: "哈兰德", tag: "HUMBLE-R", type: "谦虚型人格", desc: "无论何时你都能stay humble" },
+      { name: "内马尔", tag: "PEACH", type: "脆皮型人格", desc: "你的心理如同内马尔的身体，像桃子一样脆弱" },
+      { name: "姆巴佩", tag: "BOSS", type: "总监型人格", desc: "你天生就是要当领导的人" },
+      { name: "登贝莱", tag: "GAME-R", type: "知错能改型人格", desc: "擅长弯道超车" },
+      { name: "德布劳内", tag: "FINE-R", type: "忍辱负重型人格", desc: "越王勾践未必有你能忍" },
+      { name: "凯恩", tag: "WAIT-ER", type: "等待型人格", desc: "等一个足球回家" },
+      { name: "贝林厄姆", tag: "ACTOR", type: "表演型人格", desc: "摄像头在哪里" },
+      { name: "奥利塞", tag: "IDC", type: "淡定型人格", desc: "人生信条就仨词：I don't care" },
+      { name: "沃齐尼亚", tag: "WALL", type: "铜墙铁壁型人格", desc: "如果你还没成功，那一定是大器晚成" },
+      { name: "B费", tag: "MURMUR", type: "摊手型人格", desc: "诸葛亮未必有你会指点" },
+      { name: "维尔茨", tag: "POTATO", type: "潜力型人格", desc: "人生不能一二三四五六七八场论" },
+      { name: "维尼修斯", tag: "MALO", type: "白磷型人格", desc: "足球场上最会自燃之人" },
+      { name: "卢卡库", tag: "JOKER", type: "倒霉型人格", desc: "麻绳专挑细处断" },
+      { name: "赖斯", tag: "WORKER", type: "牛马型人格", desc: "祥子未必有你牛马" }
+    ];
+
+    const QUESTIONS = [
+      {
+        text: "早上起来照镜子，你会想什么？",
+        options: ["我怎么这么好看", "我怎么这么难看", "不爱照镜子", "照了但没什么感觉"]
+      },
+      {
+        text: "有人在球场上骂你，你会？",
+        options: ["立刻跟主裁举报", "不听不听王八念经", "当即跟对方展开互骂", "球场上若无其事，赛后跟媒体爆料"]
+      },
+      {
+        text: "面对比你弱的对手，你进了个绝平球，你会如何表现？",
+        options: ["疯狂庆祝如同捡到100万", "没脸庆祝", "小区级庆祝一下得了", "跑去跟对方球迷挑衅"]
+      },
+      {
+        text: "更衣室里，你会是什么风格？",
+        options: ["更衣室老大哥，话最多", "更衣室交际花，聊完你的聊你的", "更衣室现眼包，进来先表演一个", "更衣室小透明，默默坐角落打游戏"]
+      },
+      {
+        text: "队友浪费了你的一个助攻，你会对队友？",
+        options: ["小发雷霆", "竖大拇指", "摊手，这都能搞砸", "大发雷霆"]
+      },
+      {
+        text: "你在场上遭遇了不公正判罚，你会？",
+        options: ["辱骂裁判", "用裁判听不懂的语言辱骂裁判", "乞求裁判", "算了不管了"]
+      },
+      {
+        text: "你在场上被对方铲倒了但没受伤，你会？",
+        options: ["倒地捂脸，演出很痛的样子", "二话不说爬起来继续跑", "爬起来跟对方顶牛", "伺机报复对方"]
+      },
+      {
+        text: "比赛输了，赛后面对记者你会说？",
+        options: ["要不是运气不好，我们就赢了", "要不是裁判偏哨，我们就赢了", "要不是草皮太滑，我们就赢了", "问我干嘛，去问教练"]
+      },
+      {
+        text: "你在场上踢丢了关键点球，你会？",
+        options: ["当场跪地痛哭", "面无表情走回去", "摊手，这很正常", "都怪草皮"]
+      },
+      {
+        text: "足球对你来说意味着什么？",
+        options: ["信仰", "打发时间的娱乐活动", "只是一份工作", "还没想好"]
+      }
+    ];
+
+    // 顺序：C罗,梅西,哈兰德,内马尔,姆巴佩,登贝莱,德布劳内,凯恩,贝林厄姆,奥利塞,沃齐尼亚,B费,维尔茨,维尼修斯,卢卡库,赖斯
+    const SCORES = [
+      { A: [2,0,-1,0,2,-1,0,-1,2,-2,-1,1,-1,2,-1,-1], B: [-1,0,0,2,-1,0,0,1,-1,0,0,1,2,-1,2,0], C: [-1,2,1,-1,-1,1,1,1,-1,1,2,-1,1,-1,0,2], D: [0,1,2,-1,-1,2,2,0,-1,2,0,0,0,-1,0,1] },
+      { A: [0,0,0,1,0,0,1,2,0,0,1,2,1,-2,1,1], B: [-1,2,2,-1,-1,1,2,0,-2,2,1,-1,1,-2,0,1], C: [0,-2,-2,0,2,-1,-2,-2,0,-2,-1,0,-1,2,0,-1], D: [2,0,-1,1,1,0,-1,1,2,0,0,2,0,1,1,0] },
+      { A: [2,-1,-1,1,1,0,-1,-1,1,-2,0,0,0,0,0,0], B: [-1,1,1,0,-1,0,1,2,-1,1,1,1,1,-2,2,1], C: [0,2,2,0,0,1,2,1,-1,2,1,1,2,-1,1,2], D: [1,-2,-2,0,2,-1,-2,-2,2,-2,-1,0,-1,2,-1,-1] },
+      { A: [2,-1,0,0,2,-1,1,1,0,-2,1,1,-1,0,0,1], B: [0,0,-1,2,1,0,1,0,1,0,0,1,0,2,1,0], C: [0,-2,-2,1,0,0,-1,-1,2,-2,-1,1,-1,2,0,-1], D: [-2,1,1,-1,-2,2,0,0,-2,2,0,-1,2,-1,1,0] },
+      { A: [1,0,0,0,1,0,0,1,1,0,1,2,1,1,1,1], B: [-1,2,2,0,-2,1,2,1,-1,2,1,-2,1,-2,0,1], C: [0,0,0,0,0,1,1,1,1,1,0,2,1,0,1,0], D: [2,-2,-2,1,2,-1,-2,-1,1,-2,0,0,-1,2,0,0] },
+      { A: [1,-2,-2,0,2,-1,-2,-2,1,-2,-1,1,-1,2,0,-1], B: [1,0,0,1,1,1,0,0,1,0,0,2,1,1,1,0], C: [-1,0,0,2,-1,0,1,2,0,0,0,1,0,-1,2,0], D: [0,2,2,-1,-1,1,2,1,-1,2,2,-1,1,-2,-1,2] },
+      { A: [0,-2,-2,2,0,0,-1,0,0,-2,-2,0,0,0,1,-2], B: [1,2,2,-2,0,1,2,1,0,1,2,-1,1,-2,0,2], C: [0,-1,-1,0,2,0,-1,-1,2,-1,1,1,0,1,0,1], D: [2,-1,-1,0,1,0,-1,0,1,0,0,1,0,2,0,0] },
+      { A: [0,0,0,1,0,1,0,1,0,0,1,1,1,0,2,0], B: [1,-1,-1,1,2,0,-1,1,1,-1,0,2,0,1,1,0], C: [0,-1,-1,0,0,1,0,0,1,0,0,2,1,0,2,0], D: [0,1,1,0,-1,2,1,0,0,2,0,-1,2,0,-1,1] },
+      { A: [0,-1,-1,2,0,0,-1,1,1,-2,-1,0,0,0,2,-1], B: [0,2,2,-2,1,1,2,1,0,2,2,0,1,0,-1,2], C: [0,1,1,0,0,1,2,1,0,1,1,2,1,-1,0,1], D: [1,-1,-1,0,2,0,-1,0,1,-1,-1,2,0,2,1,-1] },
+      { A: [2,2,1,1,2,-1,1,2,2,-1,2,0,0,2,1,1], B: [-2,-1,0,1,-2,2,0,-1,-1,1,-1,1,1,-1,0,-1], C: [-1,0,1,0,-1,1,1,1,-1,2,1,1,1,-1,1,2], D: [-1,-1,0,0,-1,1,0,-1,0,1,-1,0,2,-1,1,-1] }
+    ];
+
+    const OPTION_KEYS = ["A", "B", "C", "D"];
+    const TOTAL = QUESTIONS.length;
+
+    let currentQuestion = 0;
+    let answers = [];
+    let currentResultIndex = -1;
+
+    const $ = (id) => document.getElementById(id);
+
+    const screens = {
+      start: $("start-screen"),
+      quiz: $("quiz-screen"),
+      result: $("result-screen")
+    };
+
+    function showScreen(name) {
+      Object.values(screens).forEach((s) => s.classList.remove("active"));
+      screens[name].classList.add("active");
+    }
+
+    function showToast(msg) {
+      const toast = $("toast");
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function updateProgress() {
+      const num = currentQuestion + 1;
+      $("progress-text").textContent = `第 ${num} 题 / 共 ${TOTAL} 题`;
+      $("progress-fill").style.width = `${(num / TOTAL) * 100}%`;
+    }
+
+    function renderQuestion() {
+      const q = QUESTIONS[currentQuestion];
+      $("question-text").textContent = q.text;
+      updateProgress();
+
+      const container = $("options");
+      container.innerHTML = "";
+
+      q.options.forEach((text, i) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        btn.type = "button";
+        btn.innerHTML = `<span class="option-label">${OPTION_KEYS[i]}.</span>${text}`;
+        btn.addEventListener("click", () => selectOption(i));
+        container.appendChild(btn);
+      });
+    }
+
+    function selectOption(index) {
+      const buttons = $("options").querySelectorAll(".option");
+      buttons.forEach((b) => (b.style.pointerEvents = "none"));
+      buttons[index].classList.add("selected");
+
+      answers[currentQuestion] = index;
+
+      setTimeout(() => {
+        currentQuestion++;
+        if (currentQuestion >= TOTAL) {
+          showResult(calculateResult());
+        } else {
+          renderQuestion();
+        }
+      }, 280);
+    }
+
+    function calculateResult() {
+      const totals = new Array(STARS.length).fill(0);
+
+      answers.forEach((optionIndex, qIndex) => {
+        const key = OPTION_KEYS[optionIndex];
+        const row = SCORES[qIndex][key];
+        row.forEach((score, starIndex) => {
+          totals[starIndex] += score;
+        });
+      });
+
+      let maxIndex = 0;
+      let maxScore = totals[0];
+      for (let i = 1; i < totals.length; i++) {
+        if (totals[i] > maxScore) {
+          maxScore = totals[i];
+          maxIndex = i;
+        }
+      }
+      return maxIndex;
+    }
+
+    function showResult(starIndex) {
+      currentResultIndex = starIndex;
+      const star = STARS[starIndex];
+
+      $("result-tag").textContent = star.tag;
+      $("result-name").textContent = star.name;
+      $("result-type").textContent = star.type;
+      $("result-desc").textContent = star.desc;
+
+      history.replaceState(null, "", `#${star.tag}`);
+      document.title = `我是${star.name} · ${star.type}`;
+
+      showScreen("result");
+    }
+
+    function startQuiz() {
+      currentQuestion = 0;
+      answers = [];
+      currentResultIndex = -1;
+      history.replaceState(null, "", location.pathname + location.search);
+      document.title = "假如你是个著名球星";
+      showScreen("quiz");
+      renderQuestion();
+    }
+
+    function restart() {
+      startQuiz();
+    }
+
+    async function shareResult() {
+      const url = location.href.split("#")[0] + (currentResultIndex >= 0 ? `#${STARS[currentResultIndex].tag}` : "");
+      try {
+        await navigator.clipboard.writeText(url);
+        showToast("链接已复制，快去分享吧！");
+      } catch {
+        const input = document.createElement("input");
+        input.value = url;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand("copy");
+        document.body.removeChild(input);
+        showToast("链接已复制，快去分享吧！");
+      }
+    }
+
+    function checkHash() {
+      const hash = location.hash.slice(1);
+      if (!hash) return;
+      const index = STARS.findIndex((s) => s.tag.toLowerCase() === hash.toLowerCase());
+      if (index >= 0) showResult(index);
+    }
+
+    $("btn-start").addEventListener("click", startQuiz);
+    $("btn-share").addEventListener("click", shareResult);
+    $("btn-restart").addEventListener("click", restart);
+
+    checkHash();
+  </script>
+</body>
+</html>
