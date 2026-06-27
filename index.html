@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>假如你是个著名球星</title>
+  <title>寻找你的足球人格</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -91,23 +91,22 @@
     }
 
     .ball-icon {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #fff 0%, #ddd 30%, #333 31%, #333 100%);
-      box-shadow: 0 0 40px var(--green-glow), inset 0 0 20px rgba(0,0,0,0.3);
+      width: 108px;
+      height: 108px;
       position: relative;
       animation: float 3s ease-in-out infinite;
+      filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.45)) drop-shadow(0 0 32px var(--green-glow));
     }
 
-    .ball-icon::after {
-      content: "";
-      position: absolute;
-      inset: 15%;
-      border-radius: 50%;
-      border: 2px solid rgba(0,0,0,0.15);
-      background:
-        linear-gradient(135deg, transparent 45%, rgba(0,0,0,0.1) 45%, rgba(0,0,0,0.1) 55%, transparent 55%);
+    .ball-emoji {
+  font-size: 90px;
+  animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,.45));
+} {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
     }
 
     @keyframes float {
@@ -123,12 +122,6 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-    }
-
-    .subtitle {
-      font-size: clamp(1rem, 3.5vw, 1.125rem);
-      color: var(--text-muted);
-      margin-top: -16px;
     }
 
     .btn {
@@ -357,9 +350,19 @@
 
     .result-actions {
       display: flex;
-      gap: 12px;
+      flex-wrap: nowrap;
+      gap: 8px;
       width: 100%;
       margin-top: 28px;
+    }
+
+    .result-actions .btn-secondary {
+      flex: 1;
+      min-width: 0;
+      min-height: 44px;
+      padding: 10px 8px;
+      font-size: 0.8125rem;
+      white-space: nowrap;
     }
 
     .toast {
@@ -387,8 +390,10 @@
     }
 
     @media (max-width: 380px) {
-      .result-actions { flex-direction: column; }
-      .btn-secondary { width: 100%; }
+      .result-actions .btn-secondary {
+        font-size: 0.75rem;
+        padding: 10px 6px;
+      }
     }
   </style>
 </head>
@@ -396,10 +401,11 @@
   <div class="app">
     <!-- 开始页 -->
     <section id="start-screen" class="screen start-screen active">
-      <div class="ball-icon" aria-hidden="true"></div>
+      <div class="ball-icon" aria-hidden="true">
+        <div class="ball-emoji">⚽</div>
+      </div>
       <div>
-        <h1 class="title">假如你是个著名球星</h1>
-        <p class="subtitle">10道题测出你的球场人格</p>
+        <h1 class="title">寻找你的足球人格</h1>
       </div>
       <button class="btn btn-primary" id="btn-start">开始测试</button>
     </section>
@@ -623,7 +629,7 @@
       answers = [];
       currentResultIndex = -1;
       history.replaceState(null, "", location.pathname + location.search);
-      document.title = "假如你是个著名球星";
+      document.title = "寻找你的足球人格";
       showScreen("quiz");
       renderQuestion();
     }
